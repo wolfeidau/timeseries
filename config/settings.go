@@ -17,7 +17,7 @@ type Settings struct {
 
 func LoadSettings(filenames ...string) *Settings {
 	log.Println("LoadSettings")
-	err := godotenv.Load(filenames)
+	err := godotenv.Load(filenames...)
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
