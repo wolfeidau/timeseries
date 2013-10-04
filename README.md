@@ -1,31 +1,72 @@
 # Introduction
 
-I work on at (Ninjablocks)[http://ninjablocks.com] which provides a developer platform for internet of things (IoT). We deal with a lot of time series data from sensors in our system, this comes in a few different flavours:
+I deal with a lot of time series data from sensors in the systems I maintain, 
+this comes in a few different flavours:
 
 * system performance metrics like cpu and ram usage
-* physical sensors like temperature and humidity
-* actuations which records a counter indicating how many times an button suchlike is triggered.
+* envirnoment sensors like temperature and humidity
+* actuations which records a counter indicating how many times an button
+  suchlike is triggered.
 
-# Architecture
+I also use time series data for monitoring our internal systems and
+capturing metrics about how our system is performing, so this is
+something I have a keen interest in.
 
-My aim with this system is to use Riak to store the time series data and possibly Redis to cache and peform aggregate functions.
+# Overview
 
-So we typically have < 10 time series' per customer so the idea was to have the following structure.
+This project is designed to be plugged in a micro service in a system,
+it's single focus is despatching data revieved via AMQP to one or 
+more timeseries store, the first of which is [tempodb](http://tempodb.com).
+
+# TODO
+
+Add some additional backends for the data, these will probably be:
+
+* [Graphite](http://graphite.wikidot.com/)
+* [Riak](http://basho.com/riak/)
+* [Librato](http://librato.com/)
+
+# Riak Plugin
+
+My aim with this plugin is to use Riak to store the time series data and
+possibly Redis to cache and peform aggregate functions.
+
+So we typically have < 10 time series' per customer so the idea was to
+have the following structure.
 
 ## Storage 
 
-TimeseriesMeta bucket which keeps a record of the timeseries' stored in the system with some optional meta data.
+### TimeseriesMeta Bucket
 
-The key will be the time series ID and the document will contain any configurable attributes such as retension period.
+TimeseriesMeta bucket which keeps a record of the timeseries' stored in
+the system with some optional meta data.
 
-Timeseries\_[UID] bucket which contains all this users timeseries' for a given user. This will store key as [ID]-TIMESTAMP and some JSON.
+The key will be the time series ID and the document will contain who
+owns the it, along with any configurable attributes such as retension
+period.
+
+### User Timeseries Bucket
+
+The user timeseries bucket will named based on the pattern
+Timeseries\_[UID], this will contain all the timeseries' for a given
+user. This will store a JSON document for each day under the key which
+looks like [Sensor ID]-[Date] as seen below.
+
+Key:
 ````
-{val: [number]} 
+1_1012BB022412_0101_0_30-2013_10_01
+````
+Data:
+````json
+[{"val": 12, "ts": 1380666119164},{"val": 12, "ts":1380666119374}]
 ````
 
-Where id could be something like 1\_1012BB022412\_0101\_0\_30 and number is say 12.
+# Contributing
 
-## Garbage Collection
+In lieu of a formal style guide, take care to maintain the existing
+coding style. Add unit tests for any new or changed functionality.
 
-At some point we will need to start cleaning out old data within riak, this
+# Licence
 
+Copyright (c) 2013 Mark Wolfe
+Licensed under the MIT license.
